@@ -42,7 +42,8 @@ const SignUpPage = () => {
     return errs;
   };
 
-  const handleSubmit = (e) => {
+  // New: handle form submit and call backend signup API
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -50,11 +51,26 @@ const SignUpPage = () => {
       return;
     }
     setErrors({});
-    // TODO: Signup API logic here, pass role too
 
-    // Simulate navigation
-    alert(`Signed up as ${role}!`);
-    navigate("/dashboard");
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, role }),
+      });
+
+      const data = await res.json();
+      console.log(data)
+
+      if (!res.ok) {
+        alert(data.message || "Signup failed");
+      } else {
+        alert(`Signed up successfully as ${role}! Please login.`);
+        navigate("/login");
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -70,6 +86,7 @@ const SignUpPage = () => {
             {/* Role toggle buttons */}
             <div className="flex justify-center mb-8 space-x-4">
               <button
+                type="button"
                 onClick={() => setRole("student")}
                 className={`px-6 py-2 rounded-md font-semibold transition-colors ${
                   role === "student"
@@ -80,6 +97,7 @@ const SignUpPage = () => {
                 Student
               </button>
               <button
+                type="button"
                 onClick={() => setRole("recruiter")}
                 className={`px-6 py-2 rounded-md font-semibold transition-colors ${
                   role === "recruiter"

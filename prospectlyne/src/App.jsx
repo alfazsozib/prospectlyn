@@ -7,6 +7,7 @@ import JobListingsPage from './pages/JobListingsPage';
 import PostJobPage from './pages/PostJobPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import RecruiterDashboardPage from './pages/RecruiterDashboardPage';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path='/contact' element={<ContactPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/job-listings" element={<JobListingsPage />} />
+        <Route path='/recruiter-dashboard' element={<RecruiterDashboardPage />} />
         <Route path="/post-job" element={<PostJobPage />} />
       </Routes>
 
