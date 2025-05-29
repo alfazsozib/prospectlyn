@@ -1,4 +1,3 @@
-// src/pages/LoginPage.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Header from "../components/Header";
@@ -11,6 +10,7 @@ const LoginPage = () => {
     password: "",
   });
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -26,7 +26,7 @@ const LoginPage = () => {
     return errs;
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -34,11 +34,33 @@ const LoginPage = () => {
       return;
     }
     setErrors({});
+    setServerError("");
 
-    // TODO: Actual login logic here with role info
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, role }),
+      });
 
-    alert(`Logged in as ${role}!`);
-    navigate("/dashboard");
+      if (!res.ok) {
+        const data = await res.json();
+        setServerError(data.message || "Login failed");
+        return;
+      }
+
+      const data = await res.json();
+
+      // Save token or user info as needed (localStorage example)
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      alert(`Logged in as ${role}!`);
+      navigate("/");
+    } catch (error) {
+      setServerError("Something went wrong. Please try again.");
+      console.error("Login error:", error);
+    }
   };
 
   return (
@@ -127,6 +149,11 @@ const LoginPage = () => {
                   <p className="text-red-500 text-xs mt-1">{errors.password}</p>
                 )}
               </div>
+
+              {/* Server error */}
+              {serverError && (
+                <p className="text-red-600 text-sm mb-4 text-center">{serverError}</p>
+              )}
 
               <button
                 type="submit"
