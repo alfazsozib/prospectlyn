@@ -1,8 +1,36 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const HomePage = () => {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const res = await axios.get("/api/jobs/get-jobs");
+        setJobs(res.data.slice(0, 3)); // Fetch only the first 3 jobs
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
+        setError("Failed to load jobs.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
+  const [expandedJobIndex, setExpandedJobIndex] = useState(null);
+
+  const toggleDescription = (index) => {
+    setExpandedJobIndex((prevIndex) => (prevIndex === index ? null : index));
+  };
+
   return (
     <div className="bg-gray-50">
       <Header />
@@ -49,32 +77,39 @@ const HomePage = () => {
       <section className="py-12 bg-gray-100">
         <h2 className="text-2xl font-semibold text-center mb-8">Recent Job Circulars</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-6">
-          {[
-            {
-              title: "Software Developer Internship",
-              company: "Tech Solutions",
-              details: "Duration: 6 months | Location: Remote"
-            },
-            {
-              title: "Data Analyst Intern",
-              company: "DataX Inc.",
-              details: "Duration: 3 months | Location: On-site"
-            },
-            {
-              title: "UI/UX Designer Intern",
-              company: "DesignHub",
-              details: "Duration: 3 months | Location: Remote"
-            }
-          ].map((job, i) => (
-            <div key={i} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all">
-              <h3 className="font-semibold text-lg">{job.title}</h3>
-              <p className="text-sm text-gray-500">Company: {job.company}</p>
-              <p className="mt-2 text-gray-700">{job.details}</p>
-              <Link to="/job-apply" className="mt-4 inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
-                Apply Now
-              </Link>
-            </div>
-          ))}
+          {loading ? (
+            <p className="text-center text-gray-500 text-lg">Loading jobs...</p>
+          ) : error ? (
+            <p className="text-center text-red-500 text-lg">{error}</p>
+          ) : (
+            jobs.map((job, idx) => (
+              <div key={idx} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all">
+                <h3 className="font-semibold text-lg"> <Link to={'/job-listings'}>{job.title}</Link></h3>
+                <p className="text-sm text-gray-500">Company: {job.company}</p>
+
+                {/* Description with Read More */}
+                <p
+                  className={`mt-2 text-gray-700 ${
+                    expandedJobIndex === idx ? '' : 'line-clamp-2'
+                  }`}
+                >
+                  {job.description}
+                </p>
+                
+                {/* Read More Button */}
+                <button
+                  onClick={() => toggleDescription(idx)}
+                  className="text-indigo-600 mt-2"
+                >
+                  {expandedJobIndex === idx ? 'Read Less' : 'Read More'}
+                </button>
+
+                {/* <Link to="/job-apply" className="mt-4 inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+                  Apply Now
+                </Link> */}
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -91,11 +126,9 @@ const HomePage = () => {
       <section className="py-12 bg-indigo-50 text-black">
         <h2 className="text-2xl font-semibold text-center mb-6">Common Job Interview Questions</h2>
         <div className="space-y-4 max-w-4xl mx-auto">
-          {[
-            { q: "1. Tell me about yourself", a: "A brief summary of your background, skills, and experiences." },
+          {[{ q: "1. Tell me about yourself", a: "A brief summary of your background, skills, and experiences." },
             { q: "2. Why should we hire you?", a: "Highlight your skills and experiences that make you the ideal candidate." },
-            { q: "3. Where do you see yourself in 5 years?", a: "Share your long-term goals and how they align with the company’s mission." }
-          ].map((item, i) => (
+            { q: "3. Where do you see yourself in 5 years?", a: "Share your long-term goals and how they align with the company’s mission." }].map((item, i) => (
             <details key={i} className="bg-white p-6 rounded-lg shadow-md">
               <summary className="font-medium text-lg">{item.q}</summary>
               <p className="mt-2 text-sm text-gray-700">{item.a}</p>
@@ -108,23 +141,9 @@ const HomePage = () => {
       <section className="py-16 bg-white text-center">
         <h2 className="text-3xl font-bold mb-10">What Our Users Say</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-6 max-w-6xl mx-auto">
-          {[
-            {
-              name: "Sarah Ahmed",
-              image: "https://plus.unsplash.com/premium_photo-1677368597077-009727e906db?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0",
-              review: "This platform helped me land my first internship. The interface is easy and the job updates are timely!"
-            },
-            {
-              name: "Rafiq Hasan",
-              image: "https://plus.unsplash.com/premium_photo-1689977968861-9c91dbb16049?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0",
-              review: "Excellent platform! I especially liked the employability test that gave me a confidence boost."
-            },
-            {
-              name: "Nusrat Jahan",
-              image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0",
-              review: "Simple, user-friendly, and effective! I found three job opportunities within a week."
-            }
-          ].map((user, i) => (
+          {[{ name: "Sarah Ahmed", image: "https://plus.unsplash.com/premium_photo-1677368597077-009727e906db?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0", review: "This platform helped me land my first internship. The interface is easy and the job updates are timely!" },
+            { name: "Rafiq Hasan", image: "https://plus.unsplash.com/premium_photo-1689977968861-9c91dbb16049?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0", review: "Excellent platform! I especially liked the employability test that gave me a confidence boost." },
+            { name: "Nusrat Jahan", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0", review: "Simple, user-friendly, and effective! I found three job opportunities within a week." }].map((user, i) => (
             <div key={i} className="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all">
               <img src={user.image} alt={user.name} className="w-16 h-16 rounded-full mx-auto mb-4 object-cover" />
               <h4 className="font-semibold text-lg">{user.name}</h4>
@@ -141,9 +160,7 @@ const HomePage = () => {
       <section className="py-16 bg-gradient-to-br from-indigo-50 via-white to-violet-100 text-center">
         <div className="bg-white max-w-2xl mx-auto p-10 shadow-lg border border-gray-200 rounded-2xl">
           <h2 className="text-3xl font-bold mb-3 text-indigo-800">Join Our Newsletter</h2>
-          <p className="mb-6 text-gray-600">
-            Get the latest job openings, tips, and career advice directly to your inbox.
-          </p>
+          <p className="mb-6 text-gray-600">Get the latest job openings, tips, and career advice directly to your inbox.</p>
           <form className="flex flex-col sm:flex-row justify-center gap-4">
             <input
               type="email"

@@ -13,12 +13,15 @@ router.post("/post-job", async (req, res) => {
   }
 });
 
+// GET all jobs
 router.get("/get-jobs", async (req, res) => {
   try {
-    const jobs = await Job.find().sort({ postedAt: -1 });
-    res.json(jobs);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch jobs" });
+    const jobs = await Job.find();
+    console.log(jobs)
+    res.json(jobs); 
+  } catch (err) {
+    console.error("Failed to fetch jobs:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
