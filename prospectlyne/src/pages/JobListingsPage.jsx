@@ -10,7 +10,10 @@ const JobListingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedJob, setSelectedJob] = useState(null);
-  const [appliedJobs, setAppliedJobs] = useState([]); 
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+  const [walletBalance, setWalletBalance] = useState(0); // For storing wallet balance
+  const [jobToApply, setJobToApply] = useState(null); // For storing job selected to apply
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -41,15 +44,33 @@ const JobListingsPage = () => {
   };
 
   const openModal = (job) => {
-    setSelectedJob(job);
+    setJobToApply(job); // Store selected job to apply
+    setIsModalOpen(true); // Open the modal
   };
 
   const closeModal = () => {
-    setSelectedJob(null);
+    setIsModalOpen(false); 
+    setJobToApply(null);
   };
 
   const handleApply = (jobId) => {
     setAppliedJobs((prev) => [...prev, jobId]);
+    openModal(jobId);
+  };
+
+  const handleConfirmDeduction = async () => {
+    const applicationFee = 10; // Static application fee
+    try {
+      // Deduct the fee from the wallet
+      const response = await axios.put('http://localhost:5000/api/wallet/wallet/deduct');
+      setWalletBalance(response.data.balance);
+      closeModal();
+      alert('Application fee deducted successfully!');
+      window.location.reload();
+
+    } catch (err) {
+      alert("Failed to deduct fee from the wallet.");
+    }
   };
 
   return (
@@ -136,7 +157,6 @@ const JobListingsPage = () => {
                       onClick={() => {
                         if (!appliedJobs.includes(job._id)) {
                           handleApply(job._id);
-                          openModal(job);
                         }
                       }}
                     >
@@ -151,7 +171,29 @@ const JobListingsPage = () => {
       </main>
       <Footer />
 
-      {selectedJob && <JobApplicationModal job={selectedJob} onClose={closeModal} />}
+      {/* Modal for Application Fee Confirmation */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-semibold">Confirm Application</h2>
+            <p className="my-4 text-lg">A fee of $10 will be deducted from your wallet for this application.</p>
+            <div className="flex justify-between">
+              <button
+                onClick={handleConfirmDeduction}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={closeModal}
+                className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

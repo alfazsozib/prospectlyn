@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-
+import axios from 'axios';
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,6 +17,9 @@ const Header = () => {
       try {
         const decoded = jwtDecode(token);
         setRole(decoded.role); // assuming JWT contains { role: 'student' | 'recruiter' }
+        if (decoded.role === 'student') {
+          fetchWalletBalance(); // Fetch wallet balance for students
+        }
       } catch (err) {
         console.error('Invalid token');
         setRole(null);
@@ -23,10 +27,20 @@ const Header = () => {
     }
   }, []);
 
+  const fetchWalletBalance = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/wallet/get-wallet');
+      setWalletBalance(response.data.balance);
+    } catch (err) {
+      console.error('Error fetching wallet balance:', err.message);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
     setRole(null);
+    setWalletBalance(0);
     navigate('/login');
   };
 
@@ -54,6 +68,11 @@ const Header = () => {
             )}
             <Link to="/about" className="hover:text-indigo-300 transition-colors">About</Link>
             <Link to="/contact" className="hover:text-indigo-300 transition-colors">Contact</Link>
+
+            {/* Wallet (Visible only for students) */}
+            {role === 'student' && (
+              <Link to="#" className="hover:text-indigo-300 transition-colors">Wallet: ${walletBalance}</Link>
+            )}
           </nav>
 
           {/* Auth Links */}
