@@ -11,7 +11,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
-app.use("/api/jobs", require("./routes/jobs")); // <-- Add this
+app.use("/api/jobs", require("./routes/jobs")); 
 app.use('/api/recruiter', require("./routes/recruiter"))
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

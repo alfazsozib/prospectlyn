@@ -23,13 +23,10 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    jobId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Job",  // Assuming you're using a Job model for storing job listings
-      required: true,
-    },
+    jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
+
   },
-  { timestamps: true } // This will add createdAt and updatedAt fields
+  { timestamps: true } 
 );
 
 const Application = mongoose.model("Application", applicationSchema);

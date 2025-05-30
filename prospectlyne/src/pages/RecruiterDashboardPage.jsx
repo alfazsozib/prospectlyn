@@ -14,7 +14,7 @@ const RecruiterDashboardPage = () => {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await axios.get("/api/recruiter/applications");
+        const res = await axios.get("http://localhost:5000/api/recruiter/applications");
         setApplications(res.data);
       } catch (err) {
         console.error("Error fetching applications:", err);
@@ -81,11 +81,11 @@ const RecruiterDashboardPage = () => {
                       className="bg-white rounded-xl shadow-md p-6 border border-indigo-100 hover:shadow-xl transition-shadow"
                     >
                       <h2 className="text-xl font-bold text-indigo-700 mb-2">
-                        {application.jobTitle}
+                        {application.jobId.title}
                       </h2>
                       <p className="text-gray-700 mb-1">
                         <span className="font-semibold">Name:</span>{" "}
-                        {`${application.firstName} ${application.lastName} `}
+                        {application.firstName} {application.lastName}
                       </p>
                       <p className="text-gray-700 mb-1">
                         <span className="font-semibold">Email:</span>{" "}
@@ -93,7 +93,7 @@ const RecruiterDashboardPage = () => {
                       </p>
                       <p className="text-gray-700 mb-2">
                         <span className="font-semibold">Applied on:</span>{" "}
-                        {formatDate(application.appliedAt)}
+                        {formatDate(application.createdAt)}
                       </p>
                       <a
                         href={application.resume}

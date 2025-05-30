@@ -2,16 +2,31 @@ const express = require("express");
 const router = express.Router();
 const Job = require("../models/Job");
 const Application = require("../models/Application")
+const authenticateUser = require("../middleware/authenticateUser"); 
+
+
 router.post("/post-job", async (req, res) => {
   try {
-    const job = new Job(req.body);
-    const savedJob = await job.save();
+    const { title, description, type, salary, deadline, company, logo } = req.body;
+
+    const newJob = new Job({
+      title,
+      description,
+      type,
+      salary,
+      deadline,
+      company,
+      logo,
+    });
+
+    const savedJob = await newJob.save();
     res.status(201).json(savedJob);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to post job" });
+    console.error("Error posting job:", error);
+    res.status(500).json({ message: "Failed to post job" });
   }
 });
+
 
 // GET all jobs
 router.get("/get-jobs", async (req, res) => {

@@ -14,62 +14,74 @@ const PostJobPage = () => {
   const [description, setDescription] = useState("");
   const [requirements, setRequirements] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handlePostJob = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const newJob = {
-    title,
-    company,
-    logo,
-    type,
-    salary,
-    deadline,
-    description,
-    requirements,
+    // Get the user ID (company ID) from localStorage
+    let u = localStorage.getItem('user');
+    let user = JSON.parse(u);
+    const userId = user.id
+    console.log(userId)
+
+    if (!userId) {
+      setError("You must be logged in to post a job.");
+      return;
+    }
+
+    const newJob = {
+      title,
+      company,
+      logo,
+      type,
+      salary,
+      deadline,
+      description,
+      requirements,
+      userId, 
+    };
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("http://localhost:5000/api/jobs/post-job", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newJob),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to post job.");
+      }
+
+      let data;
+      const contentType = res.headers.get("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      }
+
+      alert("Job posted successfully!");
+
+      // Reset form fields
+      setTitle("");
+      setCompany("");
+      setLogo("");
+      setType("Remote");
+      setSalary("");
+      setDeadline("");
+      setDescription("");
+      setRequirements("");
+    } catch (err) {
+      console.error("Error posting job:", err.message);
+      setError("Failed to post job: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  try {
-    setLoading(true);
-    const res = await fetch("http://localhost:5000/api/jobs/post-job", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newJob),
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text(); // Try to get readable error
-      throw new Error(errorText || "Failed to post job.");
-    }
-
-    // Only parse JSON if there's body content
-    let data;
-    const contentType = res.headers.get("Content-Type");
-    if (contentType && contentType.includes("application/json")) {
-      data = await res.json();
-    }
-
-    alert("Job posted successfully!");
-    
-    // Reset form
-    setTitle("");
-    setCompany("");
-    setLogo("");
-    setType("Remote");
-    setSalary("");
-    setDeadline("");
-    setDescription("");
-    setRequirements("");
-  } catch (err) {
-    console.error("Error posting job:", err.message);
-    alert("Failed to post job: " + err.message);
-  } finally {
-    setLoading(false);
-  }
-};
-
 
   return (
     <>
@@ -77,30 +89,17 @@ const PostJobPage = () => {
       <main className="min-h-screen bg-gradient-to-b from-indigo-100 via-indigo-50 to-white py-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
         <div className="max-w-3xl w-full bg-white rounded-3xl shadow-2xl p-12 sm:p-16 border border-indigo-200">
           <header className="mb-10 text-center">
-            <h1 className="text-4xl font-extrabold text-indigo-900 mb-2">
-              Post a New Job
-            </h1>
-            <p className="text-indigo-600 text-lg font-medium">
-              Let talented candidates find your opportunity
-            </p>
+            <h1 className="text-4xl font-extrabold text-indigo-900 mb-2">Post a New Job</h1>
+            <p className="text-indigo-600 text-lg font-medium">Let talented candidates find your opportunity</p>
           </header>
+
+          {error && <p className="text-red-500 text-center">{error}</p>}
 
           <form onSubmit={handlePostJob} className="space-y-8">
             {/* Job Title */}
             <div>
-              <label
-                htmlFor="title"
-                className="text-indigo-800 font-semibold mb-2 flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
+              <label htmlFor="title" className="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M12 20h9" />
                   <path d="M12 4v16" />
                   <path d="M3 8h7" />
@@ -120,19 +119,8 @@ const PostJobPage = () => {
 
             {/* Company Name */}
             <div>
-              <label
-                htmlFor="company"
-                className="text-indigo-800 font-semibold mb-2 flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
+              <label htmlFor="company" className="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M3 7h18" />
                   <path d="M6 7v10" />
                   <path d="M18 7v10" />
@@ -154,19 +142,8 @@ const PostJobPage = () => {
 
             {/* Company Logo URL */}
             <div>
-              <label
-                htmlFor="logo"
-                className="text-indigo-800 font-semibold mb-2 flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
+              <label htmlFor="logo" className="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M8 12h8" />
                   <path d="M12 8v8" />
@@ -185,19 +162,8 @@ const PostJobPage = () => {
 
             {/* Job Type */}
             <div>
-              <label
-                htmlFor="type"
-                className="text-indigo-800 font-semibold mb-2 flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
+              <label htmlFor="type" className="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M12 2L2 7l10 5 10-5-10-5z" />
                   <path d="M2 17l10 5 10-5" />
                   <path d="M2 12l10 5 10-5" />
@@ -221,19 +187,8 @@ const PostJobPage = () => {
 
             {/* Salary Range */}
             <div>
-              <label
-                htmlFor="salary"
-                className="text-indigo-800 font-semibold mb-2 flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
+              <label htmlFor="salary" className="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M12 1v22" />
                   <path d="M17 5H9a4 4 0 000 8h6a4 4 0 110 8H7" />
                 </svg>
@@ -252,19 +207,8 @@ const PostJobPage = () => {
 
             {/* Deadline */}
             <div>
-              <label
-                htmlFor="deadline"
-                className="text-indigo-800 font-semibold mb-2 flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
+              <label htmlFor="deadline" className="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                   <line x1="16" y1="2" x2="16" y2="6" />
                   <line x1="8" y1="2" x2="8" y2="6" />
@@ -284,19 +228,8 @@ const PostJobPage = () => {
 
             {/* Job Description */}
             <div>
-              <label
-                htmlFor="description"
-                className="text-indigo-800 font-semibold mb-2 flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
+              <label htmlFor="description" className="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M4 4h16v16H4z" />
                   <path d="M4 9h16" />
                   <path d="M9 9v11" />
@@ -316,19 +249,8 @@ const PostJobPage = () => {
 
             {/* Job Requirements */}
             <div>
-              <label
-                htmlFor="requirements"
-                className="text-indigo-800 font-semibold mb-2 flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  viewBox="0 0 24 24"
-                >
+              <label htmlFor="requirements" className="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M9 11l3 3L22 4" />
                   <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7" />
                   <path d="M7 10V6a5 5 0 0110 0v4" />
