@@ -1,29 +1,38 @@
-// src/pages/RecruiterDashboardPage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import axios from "axios";
 
 const RecruiterDashboardPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("applicants");
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const mockApplicants = [
-    {
-      jobTitle: "Frontend Developer Intern",
-      name: "Naimul Hasan",
-      email: "naimul@email.com",
-      resume: "https://example.com/resume-naimul.pdf",
-      appliedAt: "2025-05-29",
-    },
-    {
-      jobTitle: "Data Analyst Intern",
-      name: "Jannatul Ferdous",
-      email: "jannatul@email.com",
-      resume: "https://example.com/resume-janna.pdf",
-      appliedAt: "2025-05-27",
-    },
-  ];
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const res = await axios.get("/api/recruiter/applications");
+        setApplications(res.data);
+      } catch (err) {
+        console.error("Error fetching applications:", err);
+        setError("Failed to load applications.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (activeTab === "applicants") {
+      fetchApplications();
+    }
+  }, [activeTab]);
+
+  const formatDate = (dateStr) => {
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    return new Date(dateStr).toLocaleDateString(undefined, options);
+  };
 
   return (
     <>
@@ -58,32 +67,36 @@ const RecruiterDashboardPage = () => {
                 Applicants for Your Job Posts
               </h1>
 
-              {mockApplicants.length === 0 ? (
+              {loading ? (
+                <p className="text-gray-500">Loading applications...</p>
+              ) : error ? (
+                <p className="text-red-500">{error}</p>
+              ) : applications.length === 0 ? (
                 <p className="text-gray-500">No applicants yet.</p>
               ) : (
                 <div className="grid md:grid-cols-2 gap-6">
-                  {mockApplicants.map((applicant, idx) => (
+                  {applications.map((application, idx) => (
                     <div
                       key={idx}
                       className="bg-white rounded-xl shadow-md p-6 border border-indigo-100 hover:shadow-xl transition-shadow"
                     >
                       <h2 className="text-xl font-bold text-indigo-700 mb-2">
-                        {applicant.jobTitle}
+                        {application.jobTitle}
                       </h2>
                       <p className="text-gray-700 mb-1">
                         <span className="font-semibold">Name:</span>{" "}
-                        {applicant.name}
+                        {`${application.firstName} ${application.lastName} `}
                       </p>
                       <p className="text-gray-700 mb-1">
                         <span className="font-semibold">Email:</span>{" "}
-                        {applicant.email}
+                        {application.email}
                       </p>
                       <p className="text-gray-700 mb-2">
                         <span className="font-semibold">Applied on:</span>{" "}
-                        {applicant.appliedAt}
+                        {formatDate(application.appliedAt)}
                       </p>
                       <a
-                        href={applicant.resume}
+                        href={application.resume}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-block mt-2 bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-indigo-700 transition"

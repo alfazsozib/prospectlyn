@@ -50,7 +50,7 @@ const Header = () => {
             <Link to="/" className="hover:text-indigo-300 transition-colors">Home</Link>
             <Link to="/job-listings" className="hover:text-indigo-300 transition-colors">Job Listings</Link>
             {role === 'recruiter' && (
-              <Link to="/post-job" className="hover:text-indigo-300 transition-colors">Post a Job</Link>
+              <Link to="/recruiter-dashboard" className="hover:text-indigo-300 transition-colors">Dashboard</Link>
             )}
             <Link to="/about" className="hover:text-indigo-300 transition-colors">About</Link>
             <Link to="/contact" className="hover:text-indigo-300 transition-colors">Contact</Link>
