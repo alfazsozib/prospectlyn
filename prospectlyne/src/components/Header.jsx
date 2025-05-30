@@ -16,9 +16,9 @@ const Header = () => {
       setIsLoggedIn(true);
       try {
         const decoded = jwtDecode(token);
-        setRole(decoded.role); // assuming JWT contains { role: 'student' | 'recruiter' }
+        setRole(decoded.role);
         if (decoded.role === 'student') {
-          fetchWalletBalance(); // Fetch wallet balance for students
+          fetchWalletBalance();
         }
       } catch (err) {
         console.error('Invalid token');
@@ -46,20 +46,16 @@ const Header = () => {
 
   return (
     <>
-      {/* Top Message Bar */}
       <div className="bg-indigo-900 text-indigo-100 text-sm text-center py-2 px-4 shadow-sm">
         Let's join the community to Connect, Grow, and Succeed Together.
       </div>
 
-      {/* Main Header */}
       <header className="bg-indigo-700 text-white shadow-md">
         <div className="max-w-6xl mx-auto flex justify-between items-center py-4 px-6">
-          {/* Logo */}
           <div className="text-2xl font-bold">
             <Link to="/" className="hover:text-indigo-300 transition-colors">Prospectlyne</Link>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden lg:flex space-x-6 text-sm font-medium">
             <Link to="/" className="hover:text-indigo-300 transition-colors">Home</Link>
             <Link to="/job-listings" className="hover:text-indigo-300 transition-colors">Job Listings</Link>
@@ -69,14 +65,18 @@ const Header = () => {
             <Link to="/about" className="hover:text-indigo-300 transition-colors">About</Link>
             <Link to="/contact" className="hover:text-indigo-300 transition-colors">Contact</Link>
 
-            {/* Wallet (Visible only for students) */}
-            {role === 'student' && (
-              <Link to="#" className="hover:text-indigo-300 transition-colors">Wallet: ${walletBalance}</Link>
-            )}
+            
           </nav>
 
-          {/* Auth Links */}
           <div className="hidden lg:flex items-center space-x-4">
+            {role === 'student' && (
+              <button
+                className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all"
+                onClick={() => alert('Redirecting to Wallet page...')} // Placeholder for wallet click
+              >
+                <span>Wallet: ${walletBalance}</span>
+              </button>
+            )}
             {!isLoggedIn ? (
               <>
                 <Link
@@ -92,14 +92,16 @@ const Header = () => {
                   Login
                 </Link>
               </>
-            ) : (
+            ) :  (
               <button
                 onClick={handleLogout}
                 className="bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2 rounded-md text-sm font-semibold transition-colors"
               >
                 Logout
               </button>
+              
             )}
+            
           </div>
         </div>
       </header>

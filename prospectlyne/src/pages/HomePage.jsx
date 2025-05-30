@@ -8,12 +8,18 @@ const HomePage = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+
     const fetchJobs = async () => {
       try {
         const res = await axios.get("/api/jobs/get-jobs");
-        setJobs(res.data.slice(0, 3)); // Fetch only the first 3 jobs
+        setJobs(res.data.slice(0, 3));
       } catch (err) {
         console.error("Error fetching jobs:", err);
         setError("Failed to load jobs.");
@@ -35,7 +41,6 @@ const HomePage = () => {
     <div className="bg-gray-50">
       <Header />
 
-      {/* Hero Section */}
       <section className="relative h-[75vh] flex items-center justify-center text-white text-center">
         <div className="absolute inset-0">
           <img
@@ -49,18 +54,20 @@ const HomePage = () => {
         <div className="relative z-10 px-4">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Find Your Dream Job Today!</h1>
           <p className="mb-6 text-lg md:text-xl">Start your job search now and apply for top opportunities in your field.</p>
-          <div className="flex justify-center space-x-4 mb-6 flex-wrap">
-            <Link to="/signup" className="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition">
-              Sign Up Now
-            </Link>
-            <Link to="/login" className="bg-indigo-600 text-white px-8 py-3 rounded-full hover:bg-indigo-700 transition">
-              Login
-            </Link>
-          </div>
+
+          {!isLoggedIn && (
+            <div className="flex justify-center space-x-4 mb-6 flex-wrap">
+              <Link to="/signup" className="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition">
+                Sign Up Now
+              </Link>
+              <Link to="/login" className="bg-indigo-600 text-white px-8 py-3 rounded-full hover:bg-indigo-700 transition">
+                Login
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Featured Companies */}
       <section className="py-12 bg-white">
         <h2 className="text-2xl font-semibold text-center mb-8">Featured Companies</h2>
         <div className="grid grid-cols-3 md:grid-cols-6 gap-8 px-6">
@@ -73,7 +80,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Recent Job Circulars */}
       <section className="py-12 bg-gray-100">
         <h2 className="text-2xl font-semibold text-center mb-8">Recent Job Circulars</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-6">
@@ -84,10 +90,11 @@ const HomePage = () => {
           ) : (
             jobs.map((job, idx) => (
               <div key={idx} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-all">
-                <h3 className="font-semibold text-lg"> <Link to={'/job-listings'}>{job.title}</Link></h3>
+                <h3 className="font-semibold text-lg">
+                  <Link to={'/job-listings'}>{job.title}</Link>
+                </h3>
                 <p className="text-sm text-gray-500">Company: {job.company}</p>
 
-                {/* Description with Read More */}
                 <p
                   className={`mt-2 text-gray-700 ${
                     expandedJobIndex === idx ? '' : 'line-clamp-2'
@@ -95,25 +102,19 @@ const HomePage = () => {
                 >
                   {job.description}
                 </p>
-                
-                {/* Read More Button */}
+
                 <button
                   onClick={() => toggleDescription(idx)}
                   className="text-indigo-600 mt-2"
                 >
                   {expandedJobIndex === idx ? 'Read Less' : 'Read More'}
                 </button>
-
-                {/* <Link to="/job-apply" className="mt-4 inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
-                  Apply Now
-                </Link> */}
               </div>
             ))
           )}
         </div>
       </section>
 
-      {/* Employability Test */}
       <section className="py-12 bg-gradient-to-br from-indigo-600 to-purple-700 text-white text-center">
         <h2 className="text-2xl font-semibold mb-4">Test Your Employability</h2>
         <p className="mb-6">Assess your skills and improve your job readiness with our easy online tests.</p>
@@ -122,7 +123,6 @@ const HomePage = () => {
         </Link>
       </section>
 
-      {/* Interview Questions */}
       <section className="py-12 bg-indigo-50 text-black">
         <h2 className="text-2xl font-semibold text-center mb-6">Common Job Interview Questions</h2>
         <div className="space-y-4 max-w-4xl mx-auto">
@@ -137,7 +137,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
       <section className="py-16 bg-white text-center">
         <h2 className="text-3xl font-bold mb-10">What Our Users Say</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-6 max-w-6xl mx-auto">
@@ -156,7 +155,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Newsletter */}
       <section className="py-16 bg-gradient-to-br from-indigo-50 via-white to-violet-100 text-center">
         <div className="bg-white max-w-2xl mx-auto p-10 shadow-lg border border-gray-200 rounded-2xl">
           <h2 className="text-3xl font-bold mb-3 text-indigo-800">Join Our Newsletter</h2>
