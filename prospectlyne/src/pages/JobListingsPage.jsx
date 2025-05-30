@@ -2,27 +2,21 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import axios from "axios";
-
-// const companyLogos = {
-//   "Tech Solutions": "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
-//   "DataX Inc.": "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
-//   "Creative Minds": "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
-//   "DesignHub": "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
-// };
+import JobApplicationModal from "../components/JobApplicationModal";
 
 const JobListingsPage = () => {
   const [jobs, setJobs] = useState([]);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [appliedJobs, setAppliedJobs] = useState([]); 
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const res = await axios.get("/api/jobs/get-jobs");
-        console.log(res)
         setJobs(res.data);
-        
       } catch (err) {
         console.error("Error fetching jobs:", err);
         setError("Failed to load jobs.");
@@ -44,6 +38,18 @@ const JobListingsPage = () => {
   const formatDate = (dateStr) => {
     const options = { year: "numeric", month: "short", day: "numeric" };
     return new Date(dateStr).toLocaleDateString(undefined, options);
+  };
+
+  const openModal = (job) => {
+    setSelectedJob(job);
+  };
+
+  const closeModal = () => {
+    setSelectedJob(null);
+  };
+
+  const handleApply = (jobId) => {
+    setAppliedJobs((prev) => [...prev, jobId]);
   };
 
   return (
@@ -122,10 +128,19 @@ const JobListingsPage = () => {
                     </div>
 
                     <button
-                      className="mt-auto bg-indigo-600 text-white py-3 rounded-full font-semibold text-lg hover:bg-indigo-700 transition-colors"
-                      onClick={() => alert(`Apply clicked for "${job.title}"`)}
+                      className={`mt-auto py-3 rounded-full font-semibold text-lg transition-colors ${
+                        appliedJobs.includes(job._id)
+                          ? "bg-gray-400 text-white"
+                          : "bg-indigo-600 text-white hover:bg-indigo-700"
+                      }`}
+                      onClick={() => {
+                        if (!appliedJobs.includes(job._id)) {
+                          handleApply(job._id);
+                          openModal(job);
+                        }
+                      }}
                     >
-                      Apply Now
+                      {appliedJobs.includes(job._id) ? "Applied" : "Apply Now"}
                     </button>
                   </div>
                 ))
@@ -135,6 +150,8 @@ const JobListingsPage = () => {
         </div>
       </main>
       <Footer />
+
+      {selectedJob && <JobApplicationModal job={selectedJob} onClose={closeModal} />}
     </>
   );
 };
