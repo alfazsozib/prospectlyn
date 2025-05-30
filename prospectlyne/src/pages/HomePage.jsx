@@ -36,12 +36,12 @@ const HomePage = () => {
       <section className="py-12 bg-white">
         <h2 className="text-2xl font-semibold text-center mb-8">Featured Companies</h2>
         <div className="grid grid-cols-3 md:grid-cols-6 gap-8 px-6">
-          <img src="/images/company1.png" alt="Company 1" className="h-12 object-contain" />
-          <img src="/images/company2.png" alt="Company 2" className="h-12 object-contain" />
-          <img src="/images/company3.png" alt="Company 3" className="h-12 object-contain" />
-          <img src="/images/company4.png" alt="Company 4" className="h-12 object-contain" />
-          <img src="/images/company5.png" alt="Company 5" className="h-12 object-contain" />
-          <img src="/images/company6.png" alt="Company 6" className="h-12 object-contain" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Meta-Logo.png/2560px-Meta-Logo.png" alt="Company 1" className="h-12 object-contain" />
+          <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="Company 2" className="h-12 object-contain" />
+          <img src="https://graphicsprings.com/wp-content/uploads/2023/07/image-58-1024x512.png" alt="Company 3" className="h-12 object-contain" />
+          <img src="https://cdn.pixabay.com/photo/2021/12/06/13/50/tesla-6850411_640.png" alt="Company 4" className="h-12 object-contain" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Bugatti_logo.svg/1200px-Bugatti_logo.svg.png" alt="Company 5" className="h-12 object-contain" />
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgjM1UVqAF7bhND_KZw5VO3vorvfOluckCJw&s" alt="Company 6" className="h-12 object-contain" />
         </div>
       </section>
 

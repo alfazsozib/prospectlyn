@@ -1,19 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState(null);
   const navigate = useNavigate();
 
-  // Check login status on component mount
   useEffect(() => {
     const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
+
+    if (token) {
+      setIsLoggedIn(true);
+      try {
+        const decoded = jwtDecode(token);
+        setRole(decoded.role); // assuming JWT contains { role: 'student' | 'recruiter' }
+      } catch (err) {
+        console.error('Invalid token');
+        setRole(null);
+      }
+    }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
+    setRole(null);
     navigate('/login');
   };
 
@@ -36,7 +49,9 @@ const Header = () => {
           <nav className="hidden lg:flex space-x-6 text-sm font-medium">
             <Link to="/" className="hover:text-indigo-300 transition-colors">Home</Link>
             <Link to="/job-listings" className="hover:text-indigo-300 transition-colors">Job Listings</Link>
-            <Link to="/post-job" className="hover:text-indigo-300 transition-colors">Post a Job</Link>
+            {role === 'recruiter' && (
+              <Link to="/post-job" className="hover:text-indigo-300 transition-colors">Post a Job</Link>
+            )}
             <Link to="/about" className="hover:text-indigo-300 transition-colors">About</Link>
             <Link to="/contact" className="hover:text-indigo-300 transition-colors">Contact</Link>
           </nav>

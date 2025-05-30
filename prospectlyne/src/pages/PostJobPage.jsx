@@ -13,23 +13,47 @@ const PostJobPage = () => {
   const [deadline, setDeadline] = useState("");
   const [description, setDescription] = useState("");
   const [requirements, setRequirements] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handlePostJob = (e) => {
-    e.preventDefault();
+  const handlePostJob = async (e) => {
+  e.preventDefault();
 
-    const newJob = {
-      title,
-      company,
-      logo,
-      type,
-      salary,
-      deadline,
-      description,
-      requirements,
-    };
-    console.log("Job posted:", newJob);
+  const newJob = {
+    title,
+    company,
+    logo,
+    type,
+    salary,
+    deadline,
+    description,
+    requirements,
+  };
+
+  try {
+    setLoading(true);
+    const res = await fetch("http://localhost:5000/api/jobs/post-job", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newJob),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text(); // Try to get readable error
+      throw new Error(errorText || "Failed to post job.");
+    }
+
+    // Only parse JSON if there's body content
+    let data;
+    const contentType = res.headers.get("Content-Type");
+    if (contentType && contentType.includes("application/json")) {
+      data = await res.json();
+    }
+
     alert("Job posted successfully!");
-
+    
+    // Reset form
     setTitle("");
     setCompany("");
     setLogo("");
@@ -38,7 +62,14 @@ const PostJobPage = () => {
     setDeadline("");
     setDescription("");
     setRequirements("");
-  };
+  } catch (err) {
+    console.error("Error posting job:", err.message);
+    alert("Failed to post job: " + err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <>
@@ -317,9 +348,10 @@ const PostJobPage = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-5 rounded-3xl font-extrabold text-xl shadow-lg transition-transform hover:scale-105 active:scale-95"
             >
-              Post Job
+              {loading ? "Posting..." : "Post Job"}
             </button>
           </form>
         </div>
