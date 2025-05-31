@@ -24,7 +24,7 @@ const HomePage = () => {
 
     const fetchJobs = async () => {
       try {
-        const res = await axios.get("/api/jobs/get-jobs");
+        const res = await axios.get("http://localhost:5000/api/jobs/get-jobs");
         setJobs(res.data.slice(0, 3));
       } catch (err) {
         console.error("Error fetching jobs:", err);
@@ -46,7 +46,7 @@ const HomePage = () => {
     if (!email.trim()) return;
 
     try {
-      const res = await axios.post('/api/subscribe', { email });
+      const res = await axios.post('http://localhost:5000/api/subscribe', { email });
       setSubscribeMessage("Thanks for subscribing!");
       setEmail("");
     } catch (err) {
