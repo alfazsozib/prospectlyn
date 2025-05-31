@@ -10,6 +10,12 @@ const HomePage = () => {
   const [error, setError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const [expandedJobIndex, setExpandedJobIndex] = useState(null);
+
+
+  const [email, setEmail] = useState("");
+  const [subscribeMessage, setSubscribeMessage] = useState("");
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -31,10 +37,24 @@ const HomePage = () => {
     fetchJobs();
   }, []);
 
-  const [expandedJobIndex, setExpandedJobIndex] = useState(null);
-
   const toggleDescription = (index) => {
     setExpandedJobIndex((prevIndex) => (prevIndex === index ? null : index));
+  };
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    try {
+      const res = await axios.post('/api/subscribe', { email });
+      setSubscribeMessage("Thanks for subscribing!");
+      setEmail("");
+    } catch (err) {
+      console.error("Subscription error:", err);
+      setSubscribeMessage("Subscription failed. Please try again.");
+    }
+
+    setTimeout(() => setSubscribeMessage(""), 5000);
   };
 
   return (
@@ -94,7 +114,6 @@ const HomePage = () => {
                   <Link to={'/job-listings'}>{job.title}</Link>
                 </h3>
                 <p className="text-sm text-gray-500">Company: {job.company}</p>
-
                 <p
                   className={`mt-2 text-gray-700 ${
                     expandedJobIndex === idx ? '' : 'line-clamp-2'
@@ -102,7 +121,6 @@ const HomePage = () => {
                 >
                   {job.description}
                 </p>
-
                 <button
                   onClick={() => toggleDescription(idx)}
                   className="text-indigo-600 mt-2"
@@ -159,11 +177,16 @@ const HomePage = () => {
         <div className="bg-white max-w-2xl mx-auto p-10 shadow-lg border border-gray-200 rounded-2xl">
           <h2 className="text-3xl font-bold mb-3 text-indigo-800">Join Our Newsletter</h2>
           <p className="mb-6 text-gray-600">Get the latest job openings, tips, and career advice directly to your inbox.</p>
-          <form className="flex flex-col sm:flex-row justify-center gap-4">
+
+
+          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row justify-center gap-4">
             <input
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="p-3 w-full sm:w-80 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700"
+              required
             />
             <button
               type="submit"
@@ -172,6 +195,12 @@ const HomePage = () => {
               Subscribe
             </button>
           </form>
+
+
+          {subscribeMessage && (
+            <p className="text-sm mt-4 text-gray-600">{subscribeMessage}</p>
+          )}
+
           <p className="text-xs text-gray-400 mt-4">We respect your privacy. Unsubscribe anytime.</p>
         </div>
       </section>
